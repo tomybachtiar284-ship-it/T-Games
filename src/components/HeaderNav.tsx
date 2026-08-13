@@ -83,10 +83,10 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             </div>
             <div>
               <h1 className="font-black text-sm sm:text-base tracking-wide text-white drop-shadow-sm leading-none uppercase">
-                TOBA SMART
+                T-GAMES
               </h1>
               <span className="text-[10px] sm:text-xs text-amber-200 font-bold tracking-widest block">
-                CHALLENGE ⚡
+                SMART CHALLENGE ⚡
               </span>
             </div>
           </div>
@@ -102,7 +102,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-amber-400 hover:bg-amber-300 text-red-900 rounded-full font-black text-xs shadow-sm transition-transform hover:scale-105 animate-pulse"
         >
           <Sparkles className="w-3.5 h-3.5 text-red-700" />
-          <span>EVENT TOBA 2026</span>
+          <span>EVENT T-GAMES 2026</span>
           <Sparkles className="w-3.5 h-3.5 text-red-700" />
         </button>
 

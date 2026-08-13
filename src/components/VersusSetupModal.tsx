@@ -69,7 +69,7 @@ export const VersusSetupModal: React.FC<VersusSetupModalProps> = ({
             <span>MODE DUEL 2 TIANG (VERSUS)</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-gray-900 uppercase">
-            DUEL TOBA SMART CHALLENGE ⚡
+            DUEL T-GAMES SMART CHALLENGE ⚡
           </h2>
           <p className="text-xs sm:text-sm font-bold text-gray-600">
             2 Pemain bertanding langsung di 1 monitor layar lebar!

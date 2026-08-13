@@ -271,7 +271,7 @@ export const VersusGameView: React.FC<VersusGameViewProps> = ({
             </span>
           </div>
           <div className="text-[10px] font-black tracking-widest text-amber-200 uppercase mt-0.5">
-            TOBA SMART CHALLENGE ⚡
+            T-GAMES SMART CHALLENGE ⚡
           </div>
         </div>
 
@@ -438,7 +438,7 @@ export const VersusGameView: React.FC<VersusGameViewProps> = ({
             <div className="space-y-1">
               <div className="inline-flex items-center gap-1 text-amber-700 font-extrabold text-xs uppercase tracking-wider">
                 <Sparkles className="w-4 h-4" />
-                <span>HASIL DUEL TOBA SMART CHALLENGE</span>
+                <span>HASIL DUEL T-GAMES SMART CHALLENGE</span>
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-black text-gray-900 uppercase">

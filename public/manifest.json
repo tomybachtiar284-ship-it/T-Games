@@ -1,6 +1,6 @@
 {
-  "short_name": "ToBa Smart",
-  "name": "ToBa Smart Challenge",
+  "short_name": "T-Games",
+  "name": "T-Games Smart Challenge",
   "icons": [
     {
       "src": "/assets/icon-192.png",
@@ -18,5 +18,5 @@
   "theme_color": "#dc2626",
   "display": "standalone",
   "orientation": "any",
-  "description": "ToBa Smart Challenge - Game edukasi & tantangan matematika remaja interaktif dengan mode duel 2 tiang di 1 monitor."
+  "description": "T-Games Smart Challenge - Game edukasi & tantangan matematika remaja interaktif dengan mode duel 2 tiang di 1 monitor."
 }

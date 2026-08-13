@@ -51,7 +51,7 @@ export const ALL_BADGES: Badge[] = [
   {
     id: 'badge_pemula',
     title: 'Pemula Smart',
-    description: 'Selesaikan tantangan matematika ToBa pertama kali.',
+    description: 'Selesaikan tantangan matematika T-Games pertama kali.',
     icon: '🏅',
   },
   {
@@ -62,7 +62,7 @@ export const ALL_BADGES: Badge[] = [
   },
   {
     id: 'badge_raja_pinang',
-    title: 'Juara ToBa Challenge',
+    title: 'Juara T-Games Challenge',
     description: 'Berhasil mencapai puncak tantangan (Level 10)!',
     icon: '🚩',
   },
@@ -75,22 +75,22 @@ export const ALL_BADGES: Badge[] = [
   {
     id: 'badge_juara_nasional',
     title: 'Top Challenger',
-    description: 'Masuk jajaran Top 3 Leaderboard ToBa Smart Challenge.',
+    description: 'Masuk jajaran Top 3 Leaderboard T-Games Smart Challenge.',
     icon: '🏆',
   },
   {
     id: 'badge_patriot',
-    title: 'Patriot Indonesia',
-    description: 'Mengikuti Event Spesial ToBa Smart Challenge.',
-    icon: '🇮🇩',
+    title: 'Patriot T-Games',
+    description: 'Mengikuti Event Spesial T-Games Smart Challenge.',
+    icon: '⚡',
   },
 ];
 
 export const DEFAULT_PROFILE: PlayerProfile = {
   id: 'player_local_01',
-  name: 'Rizky ToBa',
+  name: 'Rizky T-Games',
   avatar: '🧑‍💻',
-  school: 'Komunitas ToBa Smart',
+  school: 'Komunitas T-Games Digital',
   selectedCharacterId: 'char_rizky',
   coins: 350,
   totalGames: 5,

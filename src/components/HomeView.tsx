@@ -38,10 +38,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <div>
             <div className="flex items-center justify-center sm:justify-start gap-1 text-amber-300 font-extrabold text-xs tracking-wider uppercase">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Event Spesial ToBa Smart 2026</span>
+              <span>Event Spesial T-Games 2026</span>
             </div>
             <h3 className="font-black text-sm sm:text-base text-white uppercase">
-              TOBA SMART CHALLENGE 2026 ⚡
+              T-GAMES SMART CHALLENGE 2026 ⚡
             </h3>
           </div>
         </div>
@@ -58,15 +58,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <div className="text-center space-y-2 pt-2">
         <div className="inline-flex items-center gap-2 bg-red-100 border border-red-300 px-3 py-1 rounded-full text-red-800 text-xs font-black shadow-xs uppercase">
           <span>⚡</span>
-          <span>GAME EDUKASI & TANTANGAN MATEMATIKA REMAJA</span>
+          <span>GAME EDUKASI & TANTANGAN MATEMATIKA REMAJA BY T-GAMES</span>
         </div>
 
         <h1 className="text-3xl sm:text-5xl font-black text-red-700 tracking-tight drop-shadow-sm uppercase">
-          TOBA SMART <span className="text-amber-500">CHALLENGE</span>
+          T-GAMES <span className="text-amber-500">SMART CHALLENGE</span>
         </h1>
 
         <p className="text-sm sm:text-base font-extrabold text-gray-700 italic max-w-md mx-auto">
-          “Tantangan Logika & Matematika Remaja Masa Kini!”
+          “Tantangan Logika & Matematika Remaja Masa Kini by T-Games!”
         </p>
       </div>
 

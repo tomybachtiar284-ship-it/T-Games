@@ -31,10 +31,10 @@ export const EventModal: React.FC<EventModalProps> = ({ onClose, onStartEventGam
         <div>
           <div className="inline-flex items-center gap-1 text-amber-600 font-extrabold text-xs uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>EVENT SPESIAL TOBA SMART 2026</span>
+            <span>EVENT SPESIAL T-GAMES 2026</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-red-700 uppercase">
-            TOBA SMART CHALLENGE
+            T-GAMES SMART CHALLENGE
           </h2>
           <p className="text-xs font-bold text-gray-600">Berlangsung: Periode Spesial 2026</p>
         </div>
@@ -44,7 +44,7 @@ export const EventModal: React.FC<EventModalProps> = ({ onClose, onStartEventGam
             <span>🏆</span>
             <span>
               <strong>Puncak Peringkat:</strong> Pemain dengan skor tertinggi di event ini akan mendapatkan
-              <strong> Badge Patriot / Master ToBa</strong> dan masuk ke Hall of Fame Juara!
+              <strong> Badge T-Games Master</strong> dan masuk ke Hall of Fame Juara!
             </span>
           </p>
           <p className="flex items-start gap-2">
@@ -71,7 +71,7 @@ export const EventModal: React.FC<EventModalProps> = ({ onClose, onStartEventGam
             }}
             className="w-2/3 py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black text-sm rounded-2xl shadow-lg border-b-4 border-red-800 animate-pulse"
           >
-            IKUTI EVENT TOBA SMART ⚡
+            IKUTI EVENT T-GAMES ⚡
           </button>
         </div>
       </div>

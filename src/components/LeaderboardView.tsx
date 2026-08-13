@@ -36,7 +36,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
           <span>PAPAN PERINGKAT JUARA</span>
         </div>
         <h2 className="text-3xl sm:text-4xl font-black text-red-700 uppercase tracking-tight">
-          LEADERBOARD TOBA SMART CHALLENGE
+          LEADERBOARD T-GAMES SMART CHALLENGE
         </h2>
         <p className="text-xs sm:text-sm font-extrabold text-gray-600">
           Peringkat skor tantangan matematika remaja terbaik se-Indonesia!

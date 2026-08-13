@@ -36,7 +36,7 @@ export const PinangPoleView: React.FC<PinangPoleViewProps> = ({
       <div className="absolute top-2 left-2 right-2 flex justify-between items-center z-10 pointer-events-none">
         <div className="bg-red-600/90 text-white text-[11px] font-black px-2.5 py-1 rounded-full border border-amber-300 shadow flex items-center gap-1">
           <span>🏆</span>
-          <span>PUNCAK TOBA SMART</span>
+          <span>PUNCAK T-GAMES</span>
         </div>
         <div className="bg-white/90 text-red-700 text-xs font-black px-2.5 py-1 rounded-full border border-red-300 shadow">
           TINGKAT {currentLevel} / {totalLevels}

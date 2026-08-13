@@ -10,9 +10,9 @@ export const AboutView: React.FC = () => {
           <Info className="w-4 h-4 text-emerald-600" />
           <span>TENTANG GAME</span>
         </div>
-        <h2 className="text-3xl font-black text-gray-800">TOBA SMART CHALLENGE</h2>
+        <h2 className="text-3xl font-black text-gray-800">T-GAMES SMART CHALLENGE</h2>
         <p className="text-xs font-extrabold text-gray-600 italic">
-          “Tantangan Logika & Matematika Remaja Masa Kini!”
+          “Tantangan Logika & Matematika Remaja Masa Kini by T-Games!”
         </p>
       </div>
 
@@ -23,7 +23,7 @@ export const AboutView: React.FC = () => {
             <span>KONSEP & TEMA PERMAINAN REMAJA</span>
           </h3>
           <p className="font-bold text-gray-700">
-            <strong>ToBa Smart Challenge</strong> adalah aplikasi game edukasi matematika & logika interaktif
+            <strong>T-Games Smart Challenge</strong> adalah aplikasi game edukasi matematika & logika interaktif
             yang dirancang khusus untuk remaja dan pelajar. Menggabungkan dinamika permainan kompetitif
             dengan tantangan berhitung cepat, penalaran logika, dan mode duel 2 tiang di 1 monitor layar lebar.
           </p>

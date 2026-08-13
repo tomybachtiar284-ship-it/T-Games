@@ -1,5 +1,5 @@
-// Service Worker for ToBa Smart Challenge PWA
-const CACHE_NAME = 'toba-smart-v1';
+// Service Worker for T-Games Smart Challenge PWA
+const CACHE_NAME = 't-games-v1';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
