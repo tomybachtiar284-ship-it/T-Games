@@ -42,6 +42,7 @@ import { RewardedAdModal } from './components/RewardedAdModal';
 import { VersusSetupModal } from './components/VersusSetupModal';
 import { VersusGameView } from './components/VersusGameView';
 import { Difficulty, MathCategory } from './types';
+import { supabase, syncProfileToCloud, fetchCloudLeaderboard, pushLeaderboardToCloud } from './utils/supabase';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<string>('home');
@@ -69,10 +70,42 @@ export default function App() {
     soundFx.setMuted(!settings.soundEnabled);
   }, [settings]);
 
+  // Supabase Auth Listener & Cloud Sync
+  useEffect(() => {
+    if (!supabase) return;
+
+    // Fetch cloud leaderboard when connected
+    fetchCloudLeaderboard().then((cloudLb) => {
+      if (cloudLb && cloudLb.length > 0) {
+        setLeaderboardData(cloudLb);
+      }
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const u = session?.user;
+      if (u) {
+        // Auto sync profile on login
+        const googleName = u.user_metadata?.full_name || u.user_metadata?.name || u.email?.split('@')[0] || profile.name;
+        const updatedProf: PlayerProfile = {
+          ...profile,
+          name: googleName,
+        };
+        setProfile(updatedProf);
+        saveStoredProfile(updatedProf);
+        syncProfileToCloud(updatedProf);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
   // Update Profile
   const handleUpdateProfile = (updated: PlayerProfile) => {
     setProfile(updated);
     saveStoredProfile(updated);
+    syncProfileToCloud(updated);
   };
 
   // Update Settings
@@ -157,7 +190,7 @@ export default function App() {
     const activeChar =
       characters.find((c) => c.id === profile.selectedCharacterId) || characters[0];
 
-    const updatedLb = addLeaderboardEntry({
+    const lbItem = {
       name: profile.name,
       school: profile.school,
       score: finalScore,
@@ -165,9 +198,13 @@ export default function App() {
       category: categoryName.replace('_', ' '),
       avatar: activeChar.emoji,
       date: new Date().toISOString().split('T')[0],
-    });
+    };
 
+    const updatedLb = addLeaderboardEntry(lbItem);
     setLeaderboardData(updatedLb);
+
+    // Push to cloud if Supabase connected
+    pushLeaderboardToCloud(lbItem);
   };
 
   // Reset Data

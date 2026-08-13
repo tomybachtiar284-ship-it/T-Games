@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Character, PlayerProfile } from '../types';
 import { ALL_BADGES } from '../data/defaultData';
-import { User, Building2, Award, Coins, Check, Lock, Edit3, Save } from 'lucide-react';
+import { User, Building2, Award, Coins, Check, Lock, Edit3, Save, LogIn, Cloud, Sparkles } from 'lucide-react';
 import { soundFx } from '../utils/audio';
+import { supabase, signInWithGoogle, signOutUser } from '../utils/supabase';
 
 interface ProfileViewProps {
   profile: PlayerProfile;
@@ -20,6 +21,20 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(profile.name);
   const [editSchool, setEditSchool] = useState(profile.school);
+  const [cloudUser, setCloudUser] = useState<{ email?: string; name?: string } | null>(null);
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => {
+      const u = data.session?.user;
+      if (u) {
+        setCloudUser({
+          email: u.email,
+          name: u.user_metadata?.full_name || u.user_metadata?.name || u.email,
+        });
+      }
+    });
+  }, []);
 
   const handleSaveInfo = () => {
     soundFx.playClick();
@@ -51,6 +66,48 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <span>PROFIL PEMAIN</span>
         </div>
         <h2 className="text-3xl font-black text-gray-800">DATA & KARAKTER SAYA</h2>
+      </div>
+
+      {/* GOOGLE CLOUD SYNC BANNER */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white rounded-3xl p-4 shadow-lg border-2 border-blue-400 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3 text-center sm:text-left">
+          <div className="w-10 h-10 rounded-full bg-white text-blue-600 flex items-center justify-center font-black text-xl shadow">
+            ☁️
+          </div>
+          <div>
+            <div className="font-black text-sm text-amber-300 uppercase flex items-center justify-center sm:justify-start gap-1">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>SUPABASE CLOUD SYNC (GOOGLE)</span>
+            </div>
+            <p className="text-xs font-extrabold text-blue-100">
+              {cloudUser
+                ? `Terhubung dengan Google (${cloudUser.email}) — Rekor Anda tersimpan di Cloud!`
+                : 'Login dengan Akun Google untuk mengamankan koin, rekor skor, dan badgemu di Cloud!'}
+            </p>
+          </div>
+        </div>
+
+        {cloudUser ? (
+          <button
+            onClick={() => {
+              soundFx.playClick();
+              signOutUser();
+            }}
+            className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-black text-xs rounded-full shadow border border-rose-300 whitespace-nowrap"
+          >
+            LOGOUT GOOGLE
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              soundFx.playClick();
+              signInWithGoogle();
+            }}
+            className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-red-950 font-black text-xs rounded-full shadow border border-amber-200 whitespace-nowrap flex items-center gap-1.5 animate-pulse"
+          >
+            <span>LOGIN GOOGLE 🚀</span>
+          </button>
+        )}
       </div>
 
       {/* PLAYER INFO CARD */}
