@@ -13,7 +13,45 @@ function shuffleArray<T>(array: T[]): T[] {
   return result;
 }
 
-export function generateQuestion(category: MathCategory, difficulty: Difficulty): Question {
+// Set to track custom questions shown during the session to prioritize unshown custom questions first
+const shownCustomQuestionIds = new Set<string>();
+
+export function generateQuestion(
+  category: MathCategory,
+  difficulty: Difficulty,
+  customQuestions?: Question[],
+  excludeText?: string
+): Question {
+  // PRIORITIZE ADMIN CUSTOM QUESTIONS (100% priority for unshown questions, 80% cycling thereafter)
+  if (customQuestions && customQuestions.length > 0) {
+    const matchingCustom = customQuestions.filter(
+      (q) => (category === 'campuran' || q.category === category) && (!excludeText || q.questionText !== excludeText)
+    );
+
+    if (matchingCustom.length > 0) {
+      // 1. First priority: Get unshown custom questions (100% Priority)
+      const unshownCustom = matchingCustom.filter((q) => !shownCustomQuestionIds.has(q.id));
+
+      if (unshownCustom.length > 0) {
+        const picked = unshownCustom[Math.floor(Math.random() * unshownCustom.length)];
+        shownCustomQuestionIds.add(picked.id);
+        return {
+          ...picked,
+          id: `q_custom_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        };
+      } else {
+        // 2. All custom questions shown once: 80% chance to cycle through custom questions
+        if (Math.random() < 0.8) {
+          const picked = matchingCustom[Math.floor(Math.random() * matchingCustom.length)];
+          return {
+            ...picked,
+            id: `q_custom_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          };
+        }
+      }
+    }
+  }
+
   let chosenCategory = category;
   if (category === 'campuran') {
     const categories: MathCategory[] = [
@@ -26,6 +64,8 @@ export function generateQuestion(category: MathCategory, difficulty: Difficulty)
       'bangun_datar',
       'bangun_ruang',
       'logika',
+      'pola',
+      'umum',
     ];
     chosenCategory = categories[Math.floor(Math.random() * categories.length)];
   }
@@ -255,37 +295,83 @@ export function generateQuestion(category: MathCategory, difficulty: Difficulty)
       break;
     }
 
+    case 'pola': {
+      const start = getRandomInt(2, 10);
+      const step = getRandomInt(3, 7);
+      const seq = [start, start + step, start + step * 2, start + step * 3];
+      const nextVal = start + step * 4;
+      questionText = `Lanjutkan pola bilangan berikut: ${seq.join(', ')}, ...`;
+      correctAnswer = nextVal.toString();
+      explanation = `Pola bertambah +${step} setiap langkah. ${seq[3]} + ${step} = ${nextVal}`;
+      distractors = [
+        (nextVal + step).toString(),
+        (nextVal - 1).toString(),
+        (nextVal + 2).toString(),
+      ];
+      break;
+    }
+
     case 'logika': {
-      const type = getRandomInt(1, 2);
-      if (type === 1) {
-        // Pola Angka
-        const start = getRandomInt(2, 10);
-        const step = getRandomInt(3, 7);
-        const seq = [start, start + step, start + step * 2, start + step * 3];
-        const nextVal = start + step * 4;
-        questionText = `Lanjutkan pola bilangan berikut: ${seq.join(', ')}, ...`;
-        correctAnswer = nextVal.toString();
-        explanation = `Pola bertambah +${step} setiap langkah. ${seq[3]} + ${step} = ${nextVal}`;
-        distractors = [
-          (nextVal + step).toString(),
-          (nextVal - 1).toString(),
-          (nextVal + 2).toString(),
-        ];
-      } else {
-        // Soal Cerita Sederhana (Kemerdekaan / Sekolah)
-        const buahAwal = getRandomInt(15, 30);
-        const beliLagi = getRandomInt(10, 20);
-        const bagikan = getRandomInt(5, 15);
-        const ans = buahAwal + beliLagi - bagikan;
-        questionText = `Budi membawa ${buahAwal} bendera kecil, lalu membeli ${beliLagi} bendera lagi. Setelah dibagikan ${bagikan} bendera ke temannya, sisa bendera Budi adalah...`;
-        correctAnswer = `${ans} bendera`;
-        explanation = `${buahAwal} + ${beliLagi} - ${bagikan} = ${ans} bendera`;
-        distractors = [
-          `${ans + 5} bendera`,
-          `${ans - 3 > 0 ? ans - 3 : ans + 8} bendera`,
-          `${buahAwal + beliLagi} bendera`,
-        ];
-      }
+      const buahAwal = getRandomInt(15, 30);
+      const beliLagi = getRandomInt(10, 20);
+      const bagikan = getRandomInt(5, 15);
+      const ans = buahAwal + beliLagi - bagikan;
+      questionText = `Budi membawa ${buahAwal} bendera kecil, lalu membeli ${beliLagi} bendera lagi. Setelah dibagikan ${bagikan} bendera ke temannya, sisa bendera Budi adalah...`;
+      correctAnswer = `${ans} bendera`;
+      explanation = `${buahAwal} + ${beliLagi} - ${bagikan} = ${ans} bendera`;
+      distractors = [
+        `${ans + 5} bendera`,
+        `${ans - 3 > 0 ? ans - 3 : ans + 8} bendera`,
+        `${buahAwal + beliLagi} bendera`,
+      ];
+      break;
+    }
+
+    case 'umum': {
+      const generalQuestions = [
+        {
+          q: 'Tahun berapakah Indonesia memproklamasikan kemerdekaan?',
+          a: '1945',
+          exp: 'Indonesia merdeka pada tanggal 17 Agustus 1945.',
+          d: ['1942', '1950', '1948'],
+        },
+        {
+          q: 'Apakah warna bendera kebangsaan Republik Indonesia?',
+          a: 'Merah Putih',
+          exp: 'Bendera negara Indonesia dinamakan Sang Merah Putih.',
+          d: ['Merah Kuning', 'Putih Merah', 'Merah Biru'],
+        },
+        {
+          q: 'Berapakah jumlah sudut pada bangun datar segitiga?',
+          a: '180°',
+          exp: 'Jumlah total sudut dalam segitiga adalah selalu 180 derajat.',
+          d: ['360°', '90°', '270°'],
+        },
+        {
+          q: 'Ibu kota negara Indonesia saat ini adalah...',
+          a: 'Jakarta / Nusantara',
+          exp: 'Ibu Kota Negara Indonesia bertransisi dari DKI Jakarta menuju Ibu Kota Nusantara (IKN).',
+          d: ['Surabaya', 'Bandung', 'Medan'],
+        },
+        {
+          q: 'Berapa jumlah hari dalam 1 tahun kabisat?',
+          a: '366 Hari',
+          exp: 'Tahun kabisat memiliki 366 hari karena bulan Februari terdiri dari 29 hari.',
+          d: ['365 Hari', '360 Hari', '364 Hari'],
+        },
+        {
+          q: 'Lambang negara Indonesia adalah...',
+          a: 'Garuda Pancasila',
+          exp: 'Garuda Pancasila adalah lambang negara Republik Indonesia dengan semboyan Bhinneka Tunggal Ika.',
+          d: ['Harimau Sumatera', 'Gajah Sumatra', 'Komodo'],
+        },
+      ];
+
+      const item = generalQuestions[getRandomInt(0, generalQuestions.length - 1)];
+      questionText = item.q;
+      correctAnswer = item.a;
+      explanation = item.exp;
+      distractors = item.d;
       break;
     }
   }

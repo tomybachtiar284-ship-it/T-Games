@@ -11,7 +11,14 @@ const STORAGE_KEY_CHARACTERS = 'panjat_pinang_characters_v1';
 export function getStoredProfile(): PlayerProfile {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_PROFILE);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && (parsed.name === 'Tomy Bachtiar' || parsed.name === 'Pemain T-Games')) {
+        parsed.name = 'Pemain Tamu';
+        saveStoredProfile(parsed);
+      }
+      return parsed;
+    }
   } catch {
     // fallback
   }

@@ -17,11 +17,33 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
   const [activeTab, setActiveTab] = useState<TabType>('nasional');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const todayStr = new Date().toISOString().split('T')[0];
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
   const filteredEntries = leaderboardData.filter((entry) => {
+    // 1. Search Query Filter
     const matchesSearch =
       entry.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       entry.school.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
+    if (!matchesSearch) return false;
+
+    // 2. Tab Category Filter
+    if (activeTab === 'harian') {
+      return entry.date === todayStr;
+    }
+    if (activeTab === 'mingguan') {
+      const entryDate = new Date(entry.date);
+      return entryDate >= sevenDaysAgo;
+    }
+    if (activeTab === 'event') {
+      return entry.category?.toLowerCase().includes('event');
+    }
+    if (activeTab === 'sekolah' || activeTab === 'teman') {
+      return entry.school && entry.school !== 'Komunitas T-Games Digital';
+    }
+
+    // Default: 'nasional' shows all entries
+    return true;
   });
 
   const topThree = filteredEntries.slice(0, 3);

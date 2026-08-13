@@ -3,7 +3,7 @@ import { Character, PlayerProfile } from '../types';
 import { ALL_BADGES } from '../data/defaultData';
 import { User, Building2, Award, Coins, Check, Lock, Edit3, Save, LogIn, Cloud, Sparkles } from 'lucide-react';
 import { soundFx } from '../utils/audio';
-import { supabase, signInWithGoogle, signOutUser } from '../utils/supabase';
+import { supabase, signInWithGoogle, signOutUser, isPremiumSubscriber, isActiveSubscriber, getSubscriptionDaysRemaining } from '../utils/supabase';
 
 interface ProfileViewProps {
   profile: PlayerProfile;
@@ -68,34 +68,35 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         <h2 className="text-3xl font-black text-gray-800">DATA & KARAKTER SAYA</h2>
       </div>
 
-      {/* GOOGLE CLOUD SYNC BANNER */}
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white rounded-3xl p-4 shadow-lg border-2 border-blue-400 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* T-GAMES DIGITAL ACCOUNT BANNER */}
+      <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-3xl p-4 shadow-lg border-2 border-amber-300 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3 text-center sm:text-left">
-          <div className="w-10 h-10 rounded-full bg-white text-blue-600 flex items-center justify-center font-black text-xl shadow">
-            ☁️
+          <div className="w-10 h-10 rounded-full bg-white text-red-600 flex items-center justify-center font-black text-xl shadow">
+            🛡️
           </div>
           <div>
             <div className="font-black text-sm text-amber-300 uppercase flex items-center justify-center sm:justify-start gap-1">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>SUPABASE CLOUD SYNC (GOOGLE)</span>
+              <span>AKUN DIGITAL T-GAMES</span>
             </div>
-            <p className="text-xs font-extrabold text-blue-100">
+            <p className="text-xs font-extrabold text-amber-100">
               {cloudUser
-                ? `Terhubung dengan Google (${cloudUser.email}) — Rekor Anda tersimpan di Cloud!`
-                : 'Login dengan Akun Google untuk mengamankan koin, rekor skor, dan badgemu di Cloud!'}
+                ? `Terhubung: ${cloudUser.email} — Rekor & Progres Terjaga Otomatis!`
+                : 'Hubungkan Akun Google Anda untuk mengamankan koin, rekor skor, dan prestasi!'}
             </p>
           </div>
         </div>
 
         {cloudUser ? (
           <button
-            onClick={() => {
+            onClick={async () => {
               soundFx.playClick();
-              signOutUser();
+              await signOutUser();
+              window.location.reload();
             }}
-            className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-black text-xs rounded-full shadow border border-rose-300 whitespace-nowrap"
+            className="px-4 py-2 bg-rose-800 hover:bg-rose-900 text-white font-black text-xs rounded-full shadow border border-rose-400 whitespace-nowrap"
           >
-            LOGOUT GOOGLE
+            KELUAR AKUN
           </button>
         ) : (
           <button
@@ -105,7 +106,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             }}
             className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-red-950 font-black text-xs rounded-full shadow border border-amber-200 whitespace-nowrap flex items-center gap-1.5 animate-pulse"
           >
-            <span>LOGIN GOOGLE 🚀</span>
+            <span>MASUK DENGAN GOOGLE 🚀</span>
           </button>
         )}
       </div>
@@ -192,6 +193,31 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="bg-amber-50 p-3 rounded-2xl border border-amber-200">
             <span className="block text-[10px] font-bold text-gray-500 uppercase">KOIN SAYA</span>
             <span className="font-black text-lg text-amber-600">🪙 {profile.coins}</span>
+          </div>
+
+          {/* Subscription Status Card */}
+          <div className={`col-span-2 p-3 rounded-2xl border-2 ${
+            isPremiumSubscriber(profile.subscriptionType, profile.subscriptionExpiresAt)
+              ? 'bg-amber-50 border-amber-300'
+              : isActiveSubscriber(profile.subscriptionType, profile.subscriptionExpiresAt)
+              ? 'bg-blue-50 border-blue-300'
+              : 'bg-gray-50 border-gray-200'
+          }`}>
+            <span className="block text-[10px] font-bold text-gray-500 uppercase">PAKET BERLANGGANAN</span>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="font-black text-sm">
+                {profile.subscriptionType === 'premium' && isActiveSubscriber(profile.subscriptionType, profile.subscriptionExpiresAt)
+                  ? '🥇 PREMIUM — Token Unlimited ♾️'
+                  : profile.subscriptionType === 'basic' && isActiveSubscriber(profile.subscriptionType, profile.subscriptionExpiresAt)
+                  ? '🥈 BASIC — Token Dipotong Normal'
+                  : '🆓 FREE — Top-Up Manual'}
+              </span>
+              {isActiveSubscriber(profile.subscriptionType, profile.subscriptionExpiresAt) && (
+                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                  ✅ Aktif {getSubscriptionDaysRemaining(profile.subscriptionExpiresAt)} hari lagi
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>

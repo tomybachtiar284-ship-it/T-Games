@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Trophy, BookOpen, User, Settings, Info, ShieldAlert, Flag, Sparkles, Swords } from 'lucide-react';
 import { Character, PlayerProfile } from '../types';
 import { soundFx } from '../utils/audio';
 import { PinangPoleView } from './PinangPoleView';
+import { supabase, isAdminUser } from '../utils/supabase';
 
 interface HomeViewProps {
   profile: PlayerProfile;
@@ -21,26 +22,55 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onNavigate,
   onOpenEventModal,
 }) => {
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!supabase) return;
+
+    supabase.auth.getSession().then(({ data }) => {
+      const email = data.session?.user?.email;
+      setIsAdmin(isAdminUser(email));
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const email = session?.user?.email;
+      setIsAdmin(isAdminUser(email));
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 pb-12">
+    <div className="w-full max-w-4xl mx-auto flex flex-col justify-between h-full space-y-2 sm:space-y-4 py-1">
       {/* 17 AGUSTUS EVENT BANNER */}
       <div
         onClick={() => {
           soundFx.playClick();
           onOpenEventModal();
         }}
-        className="w-full bg-gradient-to-r from-red-600 via-rose-500 to-red-700 text-white p-3.5 rounded-2xl border-2 border-amber-300 shadow-lg cursor-pointer hover:scale-[1.01] transition-transform flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left"
+        className="w-full bg-gradient-to-r from-red-600 via-rose-500 to-red-700 text-white p-2.5 sm:p-3 rounded-2xl border-2 border-amber-300 shadow-md cursor-pointer hover:scale-[1.01] transition-transform flex items-center justify-between gap-2 text-left"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white text-red-600 flex items-center justify-center font-black text-xl shadow">
-            🇮🇩
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white border-2 border-amber-300 flex items-center justify-center font-black text-lg shadow overflow-hidden relative flex-none">
+            <img
+              src="/logo.png"
+              alt="Logo Brand"
+              className="w-full h-full object-contain p-0.5"
+              onError={(e) => {
+                (e.currentTarget as HTMLElement).style.display = 'none';
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                if (fallback) fallback.style.display = 'flex';
+              }}
+            />
+            <span className="hidden w-full h-full items-center justify-center">🇮🇩</span>
           </div>
           <div>
-            <div className="flex items-center justify-center sm:justify-start gap-1 text-amber-300 font-extrabold text-xs tracking-wider uppercase">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1 text-amber-300 font-extrabold text-[10px] sm:text-xs tracking-wider uppercase">
+              <Sparkles className="w-3 h-3 text-amber-300" />
               <span>Event Spesial T-Games 2026</span>
             </div>
-            <h3 className="font-black text-sm sm:text-base text-white uppercase">
+            <h3 className="font-black text-xs sm:text-sm md:text-base text-white uppercase leading-tight">
               T-GAMES SMART CHALLENGE 2026 ⚡
             </h3>
           </div>
@@ -48,35 +78,35 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
         <button
           id="btn-event-claim-home"
-          className="bg-amber-400 hover:bg-amber-300 text-red-950 font-black px-4 py-1.5 rounded-full text-xs shadow border border-amber-200 whitespace-nowrap animate-pulse"
+          className="bg-amber-400 hover:bg-amber-300 text-red-950 font-black px-3 sm:px-4 py-1 rounded-full text-[10px] sm:text-xs shadow border border-amber-200 whitespace-nowrap animate-pulse flex-none"
         >
           IKUTI EVENT 🏆
         </button>
       </div>
 
-      {/* HERO SECTION WITH TITLE & LOGO */}
-      <div className="text-center space-y-2 pt-2">
-        <div className="inline-flex items-center gap-2 bg-red-100 border border-red-300 px-3 py-1 rounded-full text-red-800 text-xs font-black shadow-xs uppercase">
+      {/* HERO SECTION WITH TITLE */}
+      <div className="text-center space-y-1 pt-1">
+        <div className="inline-flex items-center gap-1.5 bg-red-100 border border-red-300 px-2.5 py-0.5 rounded-full text-red-800 text-[10px] sm:text-xs font-black shadow-2xs uppercase">
           <span>⚡</span>
           <span>GAME EDUKASI & TANTANGAN MATEMATIKA REMAJA BY T-GAMES</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-black text-red-700 tracking-tight drop-shadow-sm uppercase">
+        <h1 className="text-2xl sm:text-4xl font-black text-red-700 tracking-tight drop-shadow-sm uppercase leading-tight">
           T-GAMES <span className="text-amber-500">SMART CHALLENGE</span>
         </h1>
 
-        <p className="text-sm sm:text-base font-extrabold text-gray-700 italic max-w-md mx-auto">
+        <p className="text-xs sm:text-sm font-extrabold text-gray-700 italic max-w-md mx-auto">
           “Tantangan Logika & Matematika Remaja Masa Kini by T-Games!”
         </p>
       </div>
 
       {/* CENTERPIECE: POLE & CHARACTER PREVIEW + QUICK STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-center flex-1 min-h-0">
         {/* Left Column: Player Card Preview */}
-        <div className="md:col-span-4 bg-white p-5 rounded-3xl border-4 border-amber-300 shadow-md space-y-4 text-center">
+        <div className="hidden md:block md:col-span-4 bg-white p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl border-3 sm:border-4 border-amber-300 shadow-md space-y-2 text-center">
           <div className="relative inline-block">
             <div
-              className={`w-20 h-20 rounded-full ${activeCharacter.avatarBg} border-4 border-amber-300 shadow-lg flex items-center justify-center text-4xl mx-auto`}
+              className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full ${activeCharacter.avatarBg} border-3 border-amber-300 shadow-md flex items-center justify-center text-2xl sm:text-3xl mx-auto`}
             >
               {activeCharacter.emoji}
             </div>
@@ -226,17 +256,19 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <span>TENTANG GAME</span>
             </button>
 
-            <button
-              id="btn-home-admin"
-              onClick={() => {
-                soundFx.playClick();
-                onNavigate('admin');
-              }}
-              className="p-3 bg-red-800 hover:bg-red-900 text-amber-200 rounded-2xl font-black text-xs border-2 border-amber-400 shadow-sm flex flex-col items-center justify-center gap-1.5 transition-transform hover:scale-105"
-            >
-              <ShieldAlert className="w-5 h-5 text-amber-300" />
-              <span>ADMIN PANEL</span>
-            </button>
+            {isAdmin && (
+              <button
+                id="btn-home-admin"
+                onClick={() => {
+                  soundFx.playClick();
+                  onNavigate('admin');
+                }}
+                className="p-3 bg-red-800 hover:bg-red-900 text-amber-200 rounded-2xl font-black text-xs border-2 border-amber-400 shadow-sm flex flex-col items-center justify-center gap-1.5 transition-transform hover:scale-105"
+              >
+                <ShieldAlert className="w-5 h-5 text-amber-300" />
+                <span>ADMIN PANEL</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Volume2, VolumeX, Shield, Award, Sparkles, Flag, ArrowLeft, Maximize, Minimize, LogIn, LogOut } from 'lucide-react';
 import { PlayerProfile, GameSettings } from '../types';
 import { soundFx } from '../utils/audio';
-import { supabase, signInWithGoogle, signOutUser } from '../utils/supabase';
+import { supabase, signInWithGoogle, signOutUser, isPremiumSubscriber, isActiveSubscriber, getSubscriptionDaysRemaining } from '../utils/supabase';
 
 interface HeaderNavProps {
   currentPage: string;
@@ -11,6 +11,7 @@ interface HeaderNavProps {
   settings: GameSettings;
   onUpdateSettings: (settings: GameSettings) => void;
   onOpenEvent: () => void;
+  onLogoutRequested?: () => void;
 }
 
 export const HeaderNav: React.FC<HeaderNavProps> = ({
@@ -20,6 +21,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   settings,
   onUpdateSettings,
   onOpenEvent,
+  onLogoutRequested,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [cloudUser, setCloudUser] = useState<{ email?: string; name?: string; avatarUrl?: string } | null>(null);
@@ -113,8 +115,18 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             }}
             className="flex items-center gap-2 cursor-pointer group"
           >
-            <div className="w-9 h-9 rounded-full bg-white border-2 border-amber-300 flex items-center justify-center shadow-inner font-extrabold text-red-600 text-lg group-hover:scale-105 transition-transform">
-              🇮🇩
+            <div className="w-9 h-9 rounded-full bg-white border-2 border-amber-300 flex items-center justify-center shadow-inner font-extrabold text-red-600 text-lg group-hover:scale-105 transition-transform overflow-hidden relative">
+              <img
+                src="/logo.png"
+                alt="Logo Brand"
+                className="w-full h-full object-contain p-0.5"
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = 'none';
+                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+              />
+              <span className="hidden w-full h-full items-center justify-center">🇮🇩</span>
             </div>
             <div>
               <h1 className="font-black text-sm sm:text-base tracking-wide text-white drop-shadow-sm leading-none uppercase">
@@ -141,8 +153,50 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           <Sparkles className="w-3.5 h-3.5 text-red-700" />
         </button>
 
-        {/* Right Status (Coins, Profile link, Sound toggle) */}
+        {/* Right Status (Play Points, Coins, Profile link, Sound toggle) */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Ticket / Play Points Badge */}
+          {(() => {
+            const pts = profile.playPoints ?? 10;
+            const isPrem = isPremiumSubscriber(profile.subscriptionType, profile.subscriptionExpiresAt);
+            const isLow = !isPrem && pts <= 2 && pts > 0;
+            const isEmpty = !isPrem && pts <= 0;
+            return (
+              <div
+                onClick={() => { soundFx.playClick(); onNavigate('profile'); }}
+                title={isPrem ? 'Premium: Token Unlimited ♾️' : `Sisa ${pts} Tiket Bermain`}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black cursor-pointer border shadow-sm transition-colors ${
+                  isEmpty
+                    ? 'bg-rose-600 border-rose-400 text-white animate-pulse'
+                    : isLow
+                    ? 'bg-orange-400 border-orange-300 text-red-950'
+                    : 'bg-amber-400 border-amber-200 text-red-950 hover:bg-amber-300'
+                }`}
+              >
+                <span className="text-sm">{isEmpty ? '🛑' : isLow ? '⚠️' : '🎫'}</span>
+                <span>{isPrem ? '♾️' : pts}</span>
+                {isLow && <span className="hidden sm:inline text-[9px] font-black">HAMPIR HABIS</span>}
+                {isEmpty && <span className="hidden sm:inline text-[9px] font-black">HABIS!</span>}
+              </div>
+            );
+          })()}
+
+          {/* Subscription Status Badge */}
+          {isActiveSubscriber(profile.subscriptionType, profile.subscriptionExpiresAt) && (
+            <div
+              onClick={() => { soundFx.playClick(); onNavigate('profile'); }}
+              title={`Berlangganan ${profile.subscriptionType?.toUpperCase()} — ${getSubscriptionDaysRemaining(profile.subscriptionExpiresAt)} hari lagi`}
+              className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-black cursor-pointer shadow border transition-colors ${
+                profile.subscriptionType === 'premium'
+                  ? 'bg-amber-500 text-white border-amber-600 hover:bg-amber-600'
+                  : 'bg-blue-500 text-white border-blue-600 hover:bg-blue-600'
+              }`}
+            >
+              <span>{profile.subscriptionType === 'premium' ? '🥇' : '🥈'}</span>
+              <span className="hidden sm:inline">{profile.subscriptionType?.toUpperCase()}</span>
+            </div>
+          )}
+
           {/* Coin Badge */}
           <div
             onClick={() => {
@@ -174,7 +228,11 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
               id="btn-nav-google-logout"
               onClick={() => {
                 soundFx.playClick();
-                signOutUser();
+                if (onLogoutRequested) {
+                  onLogoutRequested();
+                } else {
+                  signOutUser();
+                }
               }}
               title={`Logged in as ${cloudUser.email}. Klik untuk Logout`}
               className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-700 hover:bg-emerald-800 border border-emerald-300 text-xs font-bold text-white transition-colors shadow-sm"

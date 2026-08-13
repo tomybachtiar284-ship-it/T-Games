@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
 import { MathCategory, Question } from '../types';
-import { BookOpen, Plus, Search, CheckCircle2, HelpCircle } from 'lucide-react';
+import { BookOpen, Plus, Search, CheckCircle2, HelpCircle, Trash2, Edit3 } from 'lucide-react';
 import { soundFx } from '../utils/audio';
 
 interface QuestionBankViewProps {
   customQuestions: Question[];
   onAddQuestion: (question: Question) => void;
+  onEditQuestion?: (question: Question) => void;
+  onDeleteQuestion?: (questionId: string) => void;
 }
 
 export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
   customQuestions,
   onAddQuestion,
+  onEditQuestion,
+  onDeleteQuestion,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('semua');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
 
   // Form State
   const [questionText, setQuestionText] = useState('');
@@ -25,16 +30,47 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
   const [correctIdx, setCorrectIdx] = useState<number>(0);
   const [category, setCategory] = useState<MathCategory>('penjumlahan');
   const [explanation, setExplanation] = useState('');
+  const [durationSeconds, setDurationSeconds] = useState<number>(15);
 
-  const handleCreateQuestion = (e: React.FormEvent) => {
+  const handleOpenAdd = () => {
+    soundFx.playClick();
+    setEditingQuestionId(null);
+    setQuestionText('');
+    setOptionA('');
+    setOptionB('');
+    setOptionC('');
+    setOptionD('');
+    setCorrectIdx(0);
+    setCategory('penjumlahan');
+    setExplanation('');
+    setDurationSeconds(15);
+    setShowAddModal(true);
+  };
+
+  const handleOpenEdit = (q: Question) => {
+    soundFx.playClick();
+    setEditingQuestionId(q.id);
+    setQuestionText(q.questionText);
+    setOptionA(q.options[0] || '');
+    setOptionB(q.options[1] || '');
+    setOptionC(q.options[2] || '');
+    setOptionD(q.options[3] || '');
+    setCorrectIdx(q.correctAnswerIndex);
+    setCategory(q.category);
+    setExplanation(q.explanation || '');
+    setDurationSeconds(q.durationSeconds || 15);
+    setShowAddModal(true);
+  };
+
+  const handleSaveQuestion = (e: React.FormEvent) => {
     e.preventDefault();
     if (!questionText || !optionA || !optionB || !optionC || !optionD) {
       alert('Mohon lengkapi seluruh pertanyaan dan 4 pilihan jawaban!');
       return;
     }
 
-    const newQ: Question = {
-      id: `custom_q_${Date.now()}`,
+    const savedQ: Question = {
+      id: editingQuestionId || `custom_q_${Date.now()}`,
       category,
       difficulty: 'normal',
       questionText,
@@ -42,19 +78,25 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
       correctAnswerIndex: correctIdx,
       explanation: explanation || 'Jawaban berdasarkan perhitungan matematika dasar.',
       points: 100,
-      durationSeconds: 15,
+      durationSeconds: durationSeconds || 15,
     };
 
-    onAddQuestion(newQ);
+    if (editingQuestionId && onEditQuestion) {
+      onEditQuestion(savedQ);
+    } else {
+      onAddQuestion(savedQ);
+    }
     soundFx.playCorrect();
 
     // Reset Form
+    setEditingQuestionId(null);
     setQuestionText('');
     setOptionA('');
     setOptionB('');
     setOptionC('');
     setOptionD('');
     setExplanation('');
+    setDurationSeconds(15);
     setShowAddModal(false);
   };
 
@@ -78,10 +120,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
 
         <button
           id="btn-add-question-modal"
-          onClick={() => {
-            soundFx.playClick();
-            setShowAddModal(true);
-          }}
+          onClick={handleOpenAdd}
           className="px-4 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black text-xs rounded-2xl shadow-md border-b-2 border-red-800 flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
@@ -111,12 +150,14 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
           <option value="penjumlahan">➕ Penjumlahan</option>
           <option value="pengurangan">➖ Pengurangan</option>
           <option value="perkalian">✖️ Perkalian</option>
-          <option value="pembagian">➕ Pembagian</option>
-          <option value="pecahan">🍕 Pecahan</option>
+          <option value="pembagian">➗ Pembagian</option>
+          <option value="pecahan">🍰 Pecahan</option>
           <option value="persentase">📊 Persentase</option>
           <option value="bangun_datar">📐 Bangun Datar</option>
           <option value="bangun_ruang">📦 Bangun Ruang</option>
-          <option value="logika">💡 Logika</option>
+          <option value="pola">🔢 Pola Bilangan</option>
+          <option value="logika">💡 Logika Matematika</option>
+          <option value="umum">🌐 Soal Umum</option>
         </select>
       </div>
 
@@ -138,7 +179,32 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                 <span className="bg-red-100 text-red-800 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase">
                   {q.category.replace('_', ' ')}
                 </span>
-                <span className="text-[10px] font-bold text-gray-400">⏱️ {q.durationSeconds} Detik</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-gray-400">⏱️ {q.durationSeconds} Detik</span>
+                  {onEditQuestion && (
+                    <button
+                      onClick={() => handleOpenEdit(q)}
+                      className="p-1 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                      title="Edit Soal"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                  )}
+                  {onDeleteQuestion && (
+                    <button
+                      onClick={() => {
+                        soundFx.playClick();
+                        if (confirm('Apakah Anda yakin ingin menghapus soal ini dari Bank Soal?')) {
+                          onDeleteQuestion(q.id);
+                        }
+                      }}
+                      className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Hapus Soal"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               <h4 className="font-black text-sm text-gray-900">{q.questionText}</h4>
@@ -176,10 +242,10 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl border-4 border-amber-300 space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="font-black text-lg text-gray-900 text-center border-b pb-2">
-              TAMBAH SOAL MATEMATIKA BARU
+              {editingQuestionId ? '✏️ EDIT SOAL MATEMATIKA' : '➕ TAMBAH SOAL MATEMATIKA BARU'}
             </h3>
 
-            <form onSubmit={handleCreateQuestion} className="space-y-3">
+            <form onSubmit={handleSaveQuestion} className="space-y-3">
               <div>
                 <label className="block text-xs font-black text-gray-700 mb-1">Kategori Soal:</label>
                 <select
@@ -190,12 +256,14 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                   <option value="penjumlahan">➕ Penjumlahan</option>
                   <option value="pengurangan">➖ Pengurangan</option>
                   <option value="perkalian">✖️ Perkalian</option>
-                  <option value="pembagian">➕ Pembagian</option>
-                  <option value="pecahan">🍕 Pecahan</option>
+                  <option value="pembagian">➗ Pembagian</option>
+                  <option value="pecahan">🍰 Pecahan</option>
                   <option value="persentase">📊 Persentase</option>
                   <option value="bangun_datar">📐 Bangun Datar</option>
                   <option value="bangun_ruang">📦 Bangun Ruang</option>
-                  <option value="logika">💡 Logika</option>
+                  <option value="pola">🔢 Pola Bilangan</option>
+                  <option value="logika">💡 Logika Matematika</option>
+                  <option value="umum">🌐 Soal Umum</option>
                 </select>
               </div>
 
@@ -254,18 +322,35 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-black text-gray-700 mb-1">Jawaban yang Benar:</label>
-                <select
-                  value={correctIdx}
-                  onChange={(e) => setCorrectIdx(Number(e.target.value))}
-                  className="w-full p-2 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold"
-                >
-                  <option value={0}>Pilihan A</option>
-                  <option value={1}>Pilihan B</option>
-                  <option value={2}>Pilihan C</option>
-                  <option value={3}>Pilihan D</option>
-                </select>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-black text-gray-700 mb-1">Jawaban yang Benar:</label>
+                  <select
+                    value={correctIdx}
+                    onChange={(e) => setCorrectIdx(Number(e.target.value))}
+                    className="w-full p-2 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold"
+                  >
+                    <option value={0}>Pilihan A</option>
+                    <option value={1}>Pilihan B</option>
+                    <option value={2}>Pilihan C</option>
+                    <option value={3}>Pilihan D</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-gray-700 mb-1">Durasi Timer (Detik):</label>
+                  <select
+                    value={durationSeconds}
+                    onChange={(e) => setDurationSeconds(Number(e.target.value))}
+                    className="w-full p-2 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold"
+                  >
+                    <option value={10}>⚡ 10 Detik (Cepat)</option>
+                    <option value={15}>⏱️ 15 Detik (Normal)</option>
+                    <option value={20}>🐢 20 Detik (Santai)</option>
+                    <option value={30}>📖 30 Detik (Panjang)</option>
+                    <option value={60}>💡 60 Detik (Analisis)</option>
+                  </select>
+                </div>
               </div>
 
               <div>

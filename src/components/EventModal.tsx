@@ -9,8 +9,8 @@ interface EventModalProps {
 
 export const EventModal: React.FC<EventModalProps> = ({ onClose, onStartEventGame }) => {
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl border-4 border-amber-300 relative space-y-4 text-center">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white w-full max-w-lg rounded-3xl p-4 sm:p-6 shadow-2xl border-4 border-amber-300 relative space-y-4 text-center max-h-[90dvh] overflow-y-auto">
         {/* Close Button */}
         <button
           id="btn-close-event-modal"
@@ -23,9 +23,19 @@ export const EventModal: React.FC<EventModalProps> = ({ onClose, onStartEventGam
           <X className="w-5 h-5" />
         </button>
 
-        {/* Flag Icon Header */}
-        <div className="w-16 h-16 rounded-full bg-red-600 border-4 border-amber-300 shadow-lg flex items-center justify-center text-3xl mx-auto animate-bounce">
-          🇮🇩
+        {/* Brand Logo Header Badge */}
+        <div className="w-16 h-16 rounded-full bg-white border-4 border-amber-300 shadow-lg flex items-center justify-center text-3xl mx-auto overflow-hidden relative">
+          <img
+            src="/logo.png"
+            alt="Logo Brand"
+            className="w-full h-full object-contain p-1"
+            onError={(e) => {
+              (e.currentTarget as HTMLElement).style.display = 'none';
+              const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+              if (fallback) fallback.style.display = 'flex';
+            }}
+          />
+          <span className="hidden w-full h-full items-center justify-center">🇮🇩</span>
         </div>
 
         <div>

@@ -10,6 +10,7 @@ import { Trophy, RefreshCw, Home, Zap, Star, ShieldCheck, Flame, Tv } from 'luci
 interface GameModalViewProps {
   activeCharacter: Character;
   profile: PlayerProfile;
+  customQuestions?: Question[];
   onGameComplete: (
     finalScore: number,
     levelReached: number,
@@ -24,6 +25,7 @@ interface GameModalViewProps {
 export const GameModalView: React.FC<GameModalViewProps> = ({
   activeCharacter,
   profile,
+  customQuestions = [],
   onGameComplete,
   onReturnHome,
   onOpenAdModal,
@@ -31,7 +33,7 @@ export const GameModalView: React.FC<GameModalViewProps> = ({
   // Game Setup State
   const [gameState, setGameState] = useState<'setup' | 'playing' | 'result'>('setup');
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('normal');
-  const [selectedCategory, setSelectedCategory] = useState<MathCategory>('penjumlahan');
+  const [selectedCategory, setSelectedCategory] = useState<MathCategory>('campuran');
   const [gameMode, setGameMode] = useState<'campaign' | 'custom'>('campaign');
 
   // Active Gameplay State
@@ -78,7 +80,7 @@ export const GameModalView: React.FC<GameModalViewProps> = ({
   // Start Playing Game
   const handleStartPlaying = () => {
     soundFx.playClick();
-    const initialCategory = gameMode === 'campaign' ? getCategoryForLevel(1) : selectedCategory;
+    const initialCategory = gameMode === 'campaign' && selectedCategory === 'campuran' ? getCategoryForLevel(1) : selectedCategory;
 
     setActiveState({
       currentLevel: 1,
@@ -98,7 +100,7 @@ export const GameModalView: React.FC<GameModalViewProps> = ({
       mode: gameMode,
     });
 
-    const firstQ = generateQuestion(initialCategory, selectedDifficulty);
+    const firstQ = generateQuestion(initialCategory, selectedDifficulty, customQuestions);
     setCurrentQuestion(firstQ);
     setGameState('playing');
   };
@@ -177,8 +179,8 @@ export const GameModalView: React.FC<GameModalViewProps> = ({
 
   const loadNextQuestion = () => {
     const nextLvl = activeState.currentLevel;
-    const cat = gameMode === 'campaign' ? getCategoryForLevel(nextLvl) : selectedCategory;
-    const q = generateQuestion(cat, selectedDifficulty);
+    const cat = gameMode === 'campaign' && selectedCategory === 'campuran' ? getCategoryForLevel(nextLvl) : selectedCategory;
+    const q = generateQuestion(cat, selectedDifficulty, customQuestions);
     setCurrentQuestion(q);
   };
 
@@ -221,7 +223,7 @@ export const GameModalView: React.FC<GameModalViewProps> = ({
   // 1. SETUP STAGE (Choose Mode, Category & Difficulty)
   if (gameState === 'setup') {
     return (
-      <div className="w-full max-w-2xl mx-auto bg-white rounded-3xl p-6 shadow-2xl border-4 border-amber-300 space-y-6">
+      <div className="w-full max-w-2xl mx-auto bg-white rounded-3xl p-4 sm:p-6 shadow-2xl border-4 border-amber-300 space-y-4 max-h-[90dvh] overflow-y-auto">
         <div className="text-center space-y-1">
           <div className="inline-block bg-red-100 text-red-800 text-xs font-black px-3 py-0.5 rounded-full border border-red-300 uppercase">
             PERSIAPAN PANJAT PINANG
@@ -305,41 +307,41 @@ export const GameModalView: React.FC<GameModalViewProps> = ({
           </div>
         </div>
 
-        {/* Category Picker (if Custom mode) */}
-        {gameMode === 'custom' && (
-          <div className="space-y-2">
-            <label className="block text-xs font-black text-gray-700 uppercase tracking-wider">
-              Kategori Soal Matematika:
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1 border rounded-2xl">
-              {[
-                { id: 'penjumlahan', label: '➕ Penjumlahan' },
-                { id: 'pengurangan', label: '➖ Pengurangan' },
-                { id: 'perkalian', label: '✖️ Perkalian' },
-                { id: 'pembagian', label: '➕ Pembagian' },
-                { id: 'pecahan', label: '🍕 Pecahan' },
-                { id: 'persentase', label: '📊 Persentase' },
-                { id: 'bangun_datar', label: '📐 Bangun Datar' },
-                { id: 'bangun_ruang', label: '📦 Bangun Ruang' },
-                { id: 'logika', label: '💡 Logika' },
-                { id: 'campuran', label: '🎲 Campuran' },
-              ].map((cat) => (
-                <button
-                  key={cat.id}
-                  id={`btn-cat-${cat.id}`}
-                  onClick={() => setSelectedCategory(cat.id as MathCategory)}
-                  className={`p-2.5 rounded-xl text-xs font-bold border text-left transition-all ${
-                    selectedCategory === cat.id
-                      ? 'bg-red-600 text-white border-amber-300 font-black'
-                      : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-amber-50'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
+        {/* Category Picker */}
+        <div className="space-y-2">
+          <label className="block text-xs font-black text-gray-700 uppercase tracking-wider">
+            Kategori Soal Matematika (Pilih Materi Match):
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1 border rounded-2xl">
+            {[
+              { id: 'campuran', label: '🎲 Campuran (Semua Materi)' },
+              { id: 'penjumlahan', label: '➕ Penjumlahan' },
+              { id: 'pengurangan', label: '➖ Pengurangan' },
+              { id: 'perkalian', label: '✖️ Perkalian' },
+              { id: 'pembagian', label: '➗ Pembagian' },
+              { id: 'pecahan', label: '🍰 Pecahan' },
+              { id: 'persentase', label: '📊 Persentase' },
+              { id: 'bangun_datar', label: '📐 Geometri Datar' },
+              { id: 'bangun_ruang', label: '📦 Bangun Ruang' },
+              { id: 'pola', label: '🔢 Pola Bilangan' },
+              { id: 'logika', label: '💡 Logika Matematika' },
+              { id: 'umum', label: '🌐 Soal Umum / Trivia' },
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                id={`btn-cat-${cat.id}`}
+                onClick={() => setSelectedCategory(cat.id as MathCategory)}
+                className={`p-2.5 rounded-xl text-xs font-bold border text-left transition-all ${
+                  selectedCategory === cat.id
+                    ? 'bg-red-600 text-white border-amber-300 font-black'
+                    : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-amber-50'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
 
         {/* Start Button */}
         <div className="pt-2 flex gap-3">
@@ -365,7 +367,7 @@ export const GameModalView: React.FC<GameModalViewProps> = ({
   // 2. ACTIVE PLAYING STAGE
   if (gameState === 'playing' && currentQuestion) {
     return (
-      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+      <div className="w-full max-w-5xl mx-auto h-full flex flex-col md:grid md:grid-cols-12 gap-3 sm:gap-6 items-stretch justify-between overflow-y-auto md:overflow-hidden">
         {/* Left: Interactive Bamboo Pole Visual */}
         <div className="md:col-span-5">
           <PinangPoleView
@@ -389,6 +391,8 @@ export const GameModalView: React.FC<GameModalViewProps> = ({
             onAnswer={handleAnswer}
             isSubmitting={isSubmitting}
             onOpenAdModal={onOpenAdModal}
+            onRestartGame={handleStartPlaying}
+            onReturnHome={onReturnHome}
           />
         </div>
       </div>

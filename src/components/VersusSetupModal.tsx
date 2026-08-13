@@ -12,7 +12,9 @@ interface VersusSetupModalProps {
     p2Name: string,
     p2Char: Character,
     category: MathCategory,
-    difficulty: Difficulty
+    difficulty: Difficulty,
+    matchDuration: number,
+    targetLevel: number
   ) => void;
   onClose: () => void;
 }
@@ -24,8 +26,12 @@ const CATEGORIES: { id: MathCategory; name: string; icon: string }[] = [
   { id: 'perkalian', name: 'Perkalian (×)', icon: '✖️' },
   { id: 'pembagian', name: 'Pembagian (÷)', icon: '➗' },
   { id: 'pecahan', name: 'Pecahan (½)', icon: '🍰' },
+  { id: 'persentase', name: 'Persentase (%)', icon: '📊' },
   { id: 'bangun_datar', name: 'Geometri Datar', icon: '📐' },
-  { id: 'logika', name: 'Logika & Pola', icon: '🧠' },
+  { id: 'bangun_ruang', name: 'Bangun Ruang', icon: '📦' },
+  { id: 'pola', name: 'Pola Bilangan', icon: '🔢' },
+  { id: 'logika', name: 'Logika Matematika', icon: '💡' },
+  { id: 'umum', name: 'Soal Umum', icon: '🌐' },
 ];
 
 export const VersusSetupModal: React.FC<VersusSetupModalProps> = ({
@@ -45,6 +51,8 @@ export const VersusSetupModal: React.FC<VersusSetupModalProps> = ({
 
   const [category, setCategory] = useState<MathCategory>('campuran');
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
+  const [matchDuration, setMatchDuration] = useState<number>(60); // Default 60 seconds
+  const [targetLevel, setTargetLevel] = useState<number>(10); // Default 10 questions/levels to win
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,13 +63,15 @@ export const VersusSetupModal: React.FC<VersusSetupModalProps> = ({
       p2Name.trim() || 'Pemain 2',
       p2Char,
       category,
-      difficulty
+      difficulty,
+      matchDuration,
+      targetLevel
     );
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
-      <div className="bg-gradient-to-b from-red-50 to-amber-50 rounded-3xl border-4 border-amber-400 shadow-2xl max-w-2xl w-full p-6 space-y-6 my-8">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fade-in">
+      <div className="bg-gradient-to-b from-red-50 to-amber-50 rounded-3xl border-4 border-amber-400 shadow-2xl max-w-2xl w-full p-4 sm:p-6 space-y-4 max-h-[90dvh] overflow-y-auto">
         {/* Header */}
         <div className="text-center space-y-1">
           <div className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow">
@@ -240,6 +250,69 @@ export const VersusSetupModal: React.FC<VersusSetupModalProps> = ({
                     }`}
                   >
                     {d === 'mudah' ? '🟢 MUDAH' : d === 'normal' ? '🟡 NORMAL' : '🔴 SULIT'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Durasi Pertandingan */}
+            <div>
+              <label className="block text-xs font-black text-gray-800 mb-1.5 uppercase">
+                ⏱️ DURASI PERTANDINGAN DUEL:
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                {[
+                  { dur: 30, label: '⚡ 30s (Kilat)' },
+                  { dur: 60, label: '⏱️ 60s (Standar)' },
+                  { dur: 90, label: '🏆 90s (Seru)' },
+                  { dur: 120, label: '⌛ 120s (2 Min)' },
+                  { dur: 0, label: '♾️ Tanpa Waktu' },
+                ].map((item) => (
+                  <button
+                    key={item.dur}
+                    type="button"
+                    onClick={() => {
+                      soundFx.playClick();
+                      setMatchDuration(item.dur);
+                    }}
+                    className={`py-2 px-1.5 rounded-xl font-black text-[11px] uppercase border-2 transition-all text-center ${
+                      matchDuration === item.dur
+                        ? 'bg-red-600 text-white border-amber-300 shadow scale-102'
+                        : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Target Level / Target Jumlah Soal Kemenangan */}
+            <div>
+              <label className="block text-xs font-black text-gray-800 mb-1.5 uppercase">
+                🎯 TARGET LEVEL / JUMLAH SOAL KEMENANGAN:
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { lvl: 5, label: '⚡ 5 Soal (Level 5)' },
+                  { lvl: 10, label: '🏆 10 Soal (Level 10)' },
+                  { lvl: 15, label: '🥇 15 Soal (Level 15)' },
+                  { lvl: 20, label: '👑 20 Soal (Level 20)' },
+                ].map((item) => (
+                  <button
+                    key={item.lvl}
+                    type="button"
+                    onClick={() => {
+                      soundFx.playClick();
+                      setTargetLevel(item.lvl);
+                    }}
+                    className={`py-2 px-2 rounded-xl font-black text-[11px] uppercase border-2 transition-all text-center ${
+                      targetLevel === item.lvl
+                        ? 'bg-amber-500 text-white border-amber-300 shadow scale-102'
+                        : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                    }`}
+                  >
+                    {item.label}
                   </button>
                 ))}
               </div>

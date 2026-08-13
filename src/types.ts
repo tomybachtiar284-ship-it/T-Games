@@ -10,6 +10,8 @@ export type MathCategory =
   | 'bangun_datar'
   | 'bangun_ruang'
   | 'logika'
+  | 'pola'
+  | 'umum'
   | 'campuran';
 
 export interface Question {
@@ -51,6 +53,9 @@ export interface PlayerProfile {
   school: string;
   selectedCharacterId: string;
   coins: number;
+  playPoints?: number; // Jatah tiket/poin bermain (default 10)
+  subscriptionType?: 'free' | 'basic' | 'premium'; // Jenis langganan
+  subscriptionExpiresAt?: string | null; // ISO date string kapan langganan berakhir
   totalGames: number;
   totalScore: number;
   highestScore: number;
