@@ -1,0 +1,6 @@
+{
+  "name": "ToBa Smart Challenge",
+  "description": "ToBa Smart Challenge - Game edukasi & tantangan matematika remaja interaktif dengan mode duel 2 tiang di 1 monitor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

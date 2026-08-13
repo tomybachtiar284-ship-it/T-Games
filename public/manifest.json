@@ -1,0 +1,22 @@
+{
+  "short_name": "ToBa Smart",
+  "name": "ToBa Smart Challenge",
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#dc2626",
+  "theme_color": "#dc2626",
+  "display": "standalone",
+  "orientation": "any",
+  "description": "ToBa Smart Challenge - Game edukasi & tantangan matematika remaja interaktif dengan mode duel 2 tiang di 1 monitor."
+}
