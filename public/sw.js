@@ -1,17 +1,7 @@
 // Service Worker for T-Games Smart Challenge PWA
-const CACHE_NAME = 't-games-v1';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json'
-];
+const CACHE_NAME = 't-games-v2';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
   self.skipWaiting();
 });
 
@@ -20,9 +10,8 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
+          // Delete older caches
+          return caches.delete(key);
         })
       );
     })
@@ -30,17 +19,32 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Network-first strategy for navigation and dynamic assets
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Cache successful responses for offline fallback
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
-      });
-    })
+        return networkResponse;
+      })
+      .catch(() => {
+        // Fallback to cache if network fails (offline)
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          if (event.request.mode === 'navigate') {
+            return caches.match('/index.html');
+          }
+        });
+      })
   );
 });

@@ -1,18 +1,37 @@
 import { createClient } from '@supabase/supabase-js';
 import { PlayerProfile, LeaderboardEntry, Question, Sponsor, Character } from '../types';
 
-// Read env variables (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY)
+// Read and sanitize env variables (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY)
 const env = (import.meta as any).env || {};
-const supabaseUrl = env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || '';
+const rawUrl = env.VITE_SUPABASE_URL || '';
+const rawKey = env.VITE_SUPABASE_ANON_KEY || '';
 
-// Check if credentials are present
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+// Clean accidental quotes or whitespace from environment variables
+const cleanUrl = String(rawUrl).trim().replace(/^["']|["']$/g, '');
+const cleanAnonKey = String(rawKey).trim().replace(/^["']|["']$/g, '');
 
-// Initialize Supabase Client (if configured)
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
+// Check if credentials are valid
+export const isSupabaseConfigured = Boolean(
+  cleanUrl && 
+  cleanAnonKey && 
+  (cleanUrl.startsWith('https://') || cleanUrl.startsWith('http://'))
+);
+
+// Initialize Supabase Client safely
+export const supabase = (() => {
+  if (!isSupabaseConfigured) return null;
+  try {
+    return createClient(cleanUrl, cleanAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    });
+  } catch (err) {
+    console.error('Error saat inisialisasi Supabase client:', err);
+    return null;
+  }
+})();
 
 // GOOGLE SIGN IN OAUTH
 export async function signInWithGoogle() {
