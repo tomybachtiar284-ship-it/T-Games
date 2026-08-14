@@ -60,11 +60,11 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [cloudUser, setCloudUser] = useState<any>(null);
 
-  // Splash Screen State
+  // Welcome / Splash Screen State (Active on initial load)
   const [splashState, setSplashState] = useState<{ active: boolean; message: string; subtitle: string }>({
-    active: false,
-    message: 'Mengamankan Akun & Logging Out... ⚡',
-    subtitle: 'Sampai Jumpa di T-Games Smart Challenge!',
+    active: true,
+    message: 'Menyiapkan Permainan & Memuat Data... ⚡',
+    subtitle: 'Selamat Datang di T-Games Smart Challenge!',
   });
 
   const [showEventModal, setShowEventModal] = useState<boolean>(false);
