@@ -10,6 +10,7 @@ import {
   GameSettings,
   LeaderboardEntry,
   MathCategory,
+  MatchHistoryItem,
   PlayerProfile,
   Question,
   Sponsor,
@@ -179,6 +180,7 @@ export default function App() {
               totalWrong: cloudData.total_wrong ?? 0,
               badges: cloudData.badges || [],
               unlockedCharacters: cloudData.unlocked_characters || profile.unlockedCharacters || ['char_rizky', 'char_nayla'],
+              matchHistory: Array.isArray(cloudData.match_history) ? cloudData.match_history : (profile.matchHistory || []),
             };
             setProfile(syncedProf);
             saveStoredProfile(syncedProf);
@@ -312,6 +314,21 @@ export default function App() {
       newBadges.push('badge_master');
     }
 
+    // Record Match History Item
+    const newHistoryItem: MatchHistoryItem = {
+      id: `mh_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      date: new Date().toISOString(),
+      category: categoryName.replace('_', ' '),
+      score: finalScore,
+      levelReached,
+      correctCount,
+      wrongCount,
+      mode: 'solo',
+      isVictory: levelReached >= 10,
+    };
+
+    const updatedHistory = [newHistoryItem, ...(profile.matchHistory || [])].slice(0, 20);
+
     const updatedProfile: PlayerProfile = {
       ...profile,
       coins: profile.coins + coinsWon,
@@ -322,6 +339,7 @@ export default function App() {
       totalCorrect: profile.totalCorrect + correctCount,
       totalWrong: profile.totalWrong + wrongCount,
       badges: newBadges,
+      matchHistory: updatedHistory,
     };
 
     handleUpdateProfile(updatedProfile);
@@ -501,8 +519,27 @@ export default function App() {
             targetLevel={versusConfig.targetLevel}
             customQuestions={customQuestions}
             onReturnHome={() => setCurrentPage('home')}
-            onGameComplete={(winnerName, p1Score, p2Score) => {
-              // Option to record versus winner
+            onGameComplete={(winnerName, p1Score, _p2Score) => {
+              const isP1Win = winnerName === profile.name || winnerName === 'Pemain 1' || winnerName === 'P1';
+              const vsHistoryItem: MatchHistoryItem = {
+                id: `mh_vs_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+                date: new Date().toISOString(),
+                category: versusConfig.category.replace('_', ' '),
+                score: p1Score,
+                levelReached: versusConfig.targetLevel,
+                correctCount: Math.floor(p1Score / 100),
+                wrongCount: 0,
+                mode: 'versus',
+                isVictory: isP1Win,
+              };
+              const updatedHistory = [vsHistoryItem, ...(profile.matchHistory || [])].slice(0, 20);
+              handleUpdateProfile({
+                ...profile,
+                totalGames: profile.totalGames + 1,
+                totalScore: profile.totalScore + p1Score,
+                highestScore: Math.max(profile.highestScore, p1Score),
+                matchHistory: updatedHistory,
+              });
             }}
           />
         )}

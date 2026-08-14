@@ -102,6 +102,7 @@ export const DEFAULT_PROFILE: PlayerProfile = {
   totalWrong: 0,
   badges: [],
   unlockedCharacters: ['char_rizky', 'char_nayla'],
+  matchHistory: [],
 };
 
 export const SEED_LEADERBOARD: LeaderboardEntry[] = [];

@@ -46,6 +46,18 @@ export interface Badge {
   unlockedAt?: string;
 }
 
+export interface MatchHistoryItem {
+  id: string;
+  date: string; // ISO string
+  category: string;
+  score: number;
+  levelReached: number;
+  correctCount: number;
+  wrongCount: number;
+  mode: 'solo' | 'versus' | 'event';
+  isVictory: boolean;
+}
+
 export interface PlayerProfile {
   id: string;
   name: string;
@@ -64,6 +76,7 @@ export interface PlayerProfile {
   totalWrong: number;
   badges: string[]; // badge IDs
   unlockedCharacters: string[];
+  matchHistory?: MatchHistoryItem[];
 }
 
 export interface LeaderboardEntry {

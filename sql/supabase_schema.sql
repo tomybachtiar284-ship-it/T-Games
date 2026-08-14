@@ -20,16 +20,18 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
   subscription_type TEXT DEFAULT 'free',
   subscription_expires_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
-  subscription_started_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
+  subscription_started_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+  match_history JSONB DEFAULT '[]'::jsonb
 );
 
 -- Add columns if profiles table already existed
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS selected_character_id TEXT DEFAULT 'char_rizky';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS unlocked_characters TEXT[] DEFAULT '{char_rizky, char_nayla}';
--- Subscription columns
+-- Subscription & Match History columns
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS subscription_type TEXT DEFAULT 'free';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS subscription_started_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS match_history JSONB DEFAULT '[]'::jsonb;
 
 -- Enable RLS for profiles
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;

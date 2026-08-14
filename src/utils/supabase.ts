@@ -93,6 +93,7 @@ export async function syncProfileToCloud(profile: PlayerProfile) {
         total_correct: profile.totalCorrect,
         total_wrong: profile.totalWrong,
         badges: profile.badges,
+        match_history: profile.matchHistory || [],
         updated_at: new Date().toISOString(),
       });
 

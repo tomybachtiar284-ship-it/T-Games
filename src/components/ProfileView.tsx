@@ -222,6 +222,116 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         </div>
       </div>
 
+      {/* MATCH HISTORY SECTION */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-black text-lg text-gray-800 flex items-center gap-2">
+            <span>📜</span>
+            <span>RIWAYAT PERTANDINGAN SAYA</span>
+          </h3>
+          {profile.matchHistory && profile.matchHistory.length > 0 && (
+            <span className="text-[11px] font-black text-amber-700 bg-amber-100 px-3 py-0.5 rounded-full border border-amber-300">
+              {profile.matchHistory.length} Pertandingan Terakhir
+            </span>
+          )}
+        </div>
+
+        {profile.matchHistory && profile.matchHistory.length > 0 ? (
+          <div className="space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar pr-1">
+            {profile.matchHistory.map((match) => {
+              const formattedDate = new Date(match.date).toLocaleString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              });
+
+              return (
+                <div
+                  key={match.id}
+                  className={`p-3.5 rounded-2xl border-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all ${
+                    match.isVictory
+                      ? 'bg-gradient-to-r from-amber-50/80 via-yellow-50/50 to-white border-amber-300 shadow-sm'
+                      : 'bg-white border-gray-200'
+                  }`}
+                >
+                  {/* Left: Mode, Category & Date */}
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-11 h-11 rounded-2xl flex items-center justify-center text-xl shadow-inner flex-none ${
+                        match.isVictory
+                          ? 'bg-amber-400 text-amber-950 border-2 border-amber-500'
+                          : 'bg-red-100 text-red-600 border border-red-200'
+                      }`}
+                    >
+                      {match.isVictory ? '🏆' : match.mode === 'versus' ? '⚔️' : '🚩'}
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-black text-sm text-gray-900 capitalize">
+                          {match.category}
+                        </span>
+                        <span
+                          className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${
+                            match.mode === 'versus'
+                              ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                              : 'bg-blue-100 text-blue-700 border border-blue-200'
+                          }`}
+                        >
+                          {match.mode === 'versus' ? '⚔️ Duel 1v1' : '🎮 Solo Challenge'}
+                        </span>
+                        {match.isVictory && (
+                          <span className="text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-300 px-2 py-0.5 rounded-full">
+                            ✨ Puncak Level 10
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[11px] font-bold text-gray-500">
+                        📅 {formattedDate}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right: Stats (Score, Level, Accuracy) */}
+                  <div className="flex items-center gap-2 sm:gap-3 self-end sm:self-center">
+                    <div className="text-right">
+                      <span className="block text-[10px] font-bold text-gray-400 uppercase">CAPAIAN</span>
+                      <span className="font-black text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg">
+                        Level {match.levelReached}
+                      </span>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="block text-[10px] font-bold text-gray-400 uppercase">AKURASI</span>
+                      <span className="font-black text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg">
+                        {match.correctCount} Benar {match.wrongCount > 0 ? `/ ${match.wrongCount} Salah` : ''}
+                      </span>
+                    </div>
+
+                    <div className="text-right pl-1 border-l">
+                      <span className="block text-[10px] font-bold text-gray-400 uppercase">SKOR</span>
+                      <span className="font-black text-sm text-red-600">
+                        +{match.score.toLocaleString('id-ID')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-6 bg-white rounded-3xl border-2 border-dashed border-gray-300 text-center space-y-2">
+            <div className="text-3xl">🎮</div>
+            <h4 className="font-black text-sm text-gray-700">Belum Ada Riwayat Pertandingan</h4>
+            <p className="text-xs font-bold text-gray-500 max-w-sm mx-auto">
+              Mainkan Game Solo atau Duel Versus sekarang untuk mencatatkan rekor dan histori pertandingan pertamamu!
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* CHARACTER SELECTION GALLERY */}
       <div className="space-y-3">
         <h3 className="font-black text-lg text-gray-800 flex items-center gap-2">

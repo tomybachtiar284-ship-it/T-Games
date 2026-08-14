@@ -17,7 +17,11 @@ export function getStoredProfile(): PlayerProfile {
         parsed.name = 'Pemain Tamu';
         saveStoredProfile(parsed);
       }
-      return parsed;
+      return {
+        ...DEFAULT_PROFILE,
+        ...parsed,
+        matchHistory: Array.isArray(parsed.matchHistory) ? parsed.matchHistory : [],
+      };
     }
   } catch {
     // fallback
