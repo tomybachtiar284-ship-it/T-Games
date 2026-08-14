@@ -143,6 +143,12 @@ export default function App() {
       const u = session?.user;
       setCloudUser(u || null);
       setIsAdmin(isAdminUser(u?.email));
+      
+      // Clean access_token from URL address bar if present
+      if (window.location.hash && window.location.hash.includes('access_token')) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+
       if (u) {
         const googleName = u.user_metadata?.full_name || u.user_metadata?.name || u.email?.split('@')[0] || 'Pengguna Google';
         
