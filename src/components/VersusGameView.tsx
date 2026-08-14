@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Character, Difficulty, MathCategory, Question } from '../types';
-import { generateQuestion } from '../utils/mathGenerator';
+import { generateQuestion, resetSessionCustomQuestions } from '../utils/mathGenerator';
 import { soundFx } from '../utils/audio';
 import { PinangPoleView } from './PinangPoleView';
 import { Swords, Trophy, RotateCcw, Home, Clock, AlertTriangle, Sparkles, CheckCircle2, XCircle, Maximize, Minimize } from 'lucide-react';
@@ -41,10 +41,16 @@ export const VersusGameView: React.FC<VersusGameViewProps> = ({
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [winner, setWinner] = useState<'p1' | 'p2' | 'draw' | null>(null);
 
+  // TRACK RECENT QUESTIONS IN VERSUS MATCH
+  const [recentQuestions, setRecentQuestions] = useState<string[]>([]);
+
   // PLAYER 1 STATE
   const [p1Level, setP1Level] = useState<number>(0);
   const [p1Score, setP1Score] = useState<number>(0);
-  const [p1Question, setP1Question] = useState<Question>(() => generateQuestion(category, difficulty, customQuestions));
+  const [p1Question, setP1Question] = useState<Question>(() => {
+    resetSessionCustomQuestions();
+    return generateQuestion(category, difficulty, customQuestions);
+  });
   const [p1IsClimbing, setP1IsClimbing] = useState<boolean>(false);
   const [p1IsSlipping, setP1IsSlipping] = useState<boolean>(false);
   const [p1Feedback, setP1Feedback] = useState<{ type: 'correct' | 'wrong'; text: string } | null>(null);
@@ -140,11 +146,12 @@ export const VersusGameView: React.FC<VersusGameViewProps> = ({
 
         const nextLvl = Math.min(targetLevel, p1Level + 1);
         setP1Level(nextLvl);
-
         setTimeout(() => {
           setP1IsClimbing(false);
           setP1Feedback(null);
-          setP1Question(generateQuestion(category, difficulty, customQuestions, p2Question.questionText));
+          const nextQ = generateQuestion(category, difficulty, customQuestions, [p2Question.questionText, p1Question.questionText, ...recentQuestions]);
+          setP1Question(nextQ);
+          setRecentQuestions((prev) => [...prev.slice(-15), nextQ.questionText]);
           checkVictory('p1', nextLvl, nextLvl, p2Level);
         }, 600);
       } else {
@@ -159,11 +166,13 @@ export const VersusGameView: React.FC<VersusGameViewProps> = ({
         setTimeout(() => {
           setP1IsSlipping(false);
           setP1Feedback(null);
-          setP1Question(generateQuestion(category, difficulty, customQuestions, p2Question.questionText));
+          const nextQ = generateQuestion(category, difficulty, customQuestions, [p2Question.questionText, p1Question.questionText, ...recentQuestions]);
+          setP1Question(nextQ);
+          setRecentQuestions((prev) => [...prev.slice(-15), nextQ.questionText]);
         }, 1200);
       }
     },
-    [isGameOver, isPaused, p1IsSlipping, p1IsClimbing, p1Question, p2Question, p1Level, p2Level, category, difficulty, customQuestions]
+    [isGameOver, isPaused, p1IsSlipping, p1IsClimbing, p1Question, p2Question, p1Level, p2Level, category, difficulty, customQuestions, recentQuestions]
   );
 
   // ANSWER HANDLER FOR PLAYER 2
@@ -184,7 +193,9 @@ export const VersusGameView: React.FC<VersusGameViewProps> = ({
         setTimeout(() => {
           setP2IsClimbing(false);
           setP2Feedback(null);
-          setP2Question(generateQuestion(category, difficulty, customQuestions, p1Question.questionText));
+          const nextQ = generateQuestion(category, difficulty, customQuestions, [p1Question.questionText, p2Question.questionText, ...recentQuestions]);
+          setP2Question(nextQ);
+          setRecentQuestions((prev) => [...prev.slice(-15), nextQ.questionText]);
           checkVictory('p2', nextLvl, p1Level, nextLvl);
         }, 600);
       } else {
@@ -199,11 +210,13 @@ export const VersusGameView: React.FC<VersusGameViewProps> = ({
         setTimeout(() => {
           setP2IsSlipping(false);
           setP2Feedback(null);
-          setP2Question(generateQuestion(category, difficulty, customQuestions, p1Question.questionText));
+          const nextQ = generateQuestion(category, difficulty, customQuestions, [p1Question.questionText, p2Question.questionText, ...recentQuestions]);
+          setP2Question(nextQ);
+          setRecentQuestions((prev) => [...prev.slice(-15), nextQ.questionText]);
         }, 1200);
       }
     },
-    [isGameOver, isPaused, p2IsSlipping, p2IsClimbing, p2Question, p1Question, p2Level, p1Level, category, difficulty, customQuestions]
+    [isGameOver, isPaused, p2IsSlipping, p2IsClimbing, p2Question, p1Question, p2Level, p1Level, category, difficulty, customQuestions, recentQuestions]
   );
 
   // KEYBOARD LISTENER FOR BOTH PLAYERS
@@ -248,6 +261,7 @@ export const VersusGameView: React.FC<VersusGameViewProps> = ({
   // RESET MATCH
   const handleRestartMatch = () => {
     soundFx.playClick();
+    resetSessionCustomQuestions();
     setTimeLeft(matchDuration);
     setIsGameOver(false);
     setWinner(null);
@@ -257,16 +271,17 @@ export const VersusGameView: React.FC<VersusGameViewProps> = ({
     setP1IsClimbing(false);
     setP1IsSlipping(false);
     setP1Feedback(null);
-    const newP1Q = generateQuestion(category, difficulty, customQuestions);
-    const newP2Q = generateQuestion(category, difficulty, customQuestions, newP1Q.questionText);
+    const newP1Q = generateQuestion(category, difficulty, customQuestions, []);
+    const newP2Q = generateQuestion(category, difficulty, customQuestions, [newP1Q.questionText]);
     setP1Question(newP1Q);
+    setP2Question(newP2Q);
+    setRecentQuestions([newP1Q.questionText, newP2Q.questionText]);
 
     setP2Level(0);
     setP2Score(0);
     setP2IsClimbing(false);
     setP2IsSlipping(false);
     setP2Feedback(null);
-    setP2Question(newP2Q);
   };
 
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { ActiveGameState, Character, Difficulty, MathCategory, PlayerProfile, Question } from '../types';
-import { generateQuestion } from '../utils/mathGenerator';
+import { generateQuestion, resetSessionCustomQuestions } from '../utils/mathGenerator';
 import { soundFx } from '../utils/audio';
 import { PinangPoleView } from './PinangPoleView';
 import { QuestionCard } from './QuestionCard';
@@ -56,6 +56,7 @@ export const GameModalView: React.FC<GameModalViewProps> = ({
   });
 
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
+  const [recentQuestions, setRecentQuestions] = useState<string[]>([]);
   const [isClimbing, setIsClimbing] = useState(false);
   const [isSlipping, setIsSlipping] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,6 +81,7 @@ export const GameModalView: React.FC<GameModalViewProps> = ({
   // Start Playing Game
   const handleStartPlaying = () => {
     soundFx.playClick();
+    resetSessionCustomQuestions();
     const initialCategory = gameMode === 'campaign' && selectedCategory === 'campuran' ? getCategoryForLevel(1) : selectedCategory;
 
     setActiveState({
@@ -100,8 +102,9 @@ export const GameModalView: React.FC<GameModalViewProps> = ({
       mode: gameMode,
     });
 
-    const firstQ = generateQuestion(initialCategory, selectedDifficulty, customQuestions);
+    const firstQ = generateQuestion(initialCategory, selectedDifficulty, customQuestions, []);
     setCurrentQuestion(firstQ);
+    setRecentQuestions([firstQ.questionText]);
     setGameState('playing');
   };
 
@@ -180,8 +183,9 @@ export const GameModalView: React.FC<GameModalViewProps> = ({
   const loadNextQuestion = () => {
     const nextLvl = activeState.currentLevel;
     const cat = gameMode === 'campaign' && selectedCategory === 'campuran' ? getCategoryForLevel(nextLvl) : selectedCategory;
-    const q = generateQuestion(cat, selectedDifficulty, customQuestions);
+    const q = generateQuestion(cat, selectedDifficulty, customQuestions, recentQuestions);
     setCurrentQuestion(q);
+    setRecentQuestions((prev) => [...prev.slice(-15), q.questionText]);
   };
 
   const triggerVictory = () => {
